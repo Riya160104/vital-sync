@@ -1,6 +1,6 @@
 import React from 'react';
 
-const PatientCard = ({ patient, onEdit, onDelete }) => {
+const PatientCard = ({ patient, onEdit, onDelete, onAISummary }) => {
   const getBloodGroupColor = (bg) => {
     const colors = {
       'A+': '#10B981', 'A-': '#059669',
@@ -68,8 +68,6 @@ const PatientCard = ({ patient, onEdit, onDelete }) => {
             fontWeight: '500',
             transition: 'all 0.3s'
           }}
-          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(139,92,246,0.3)'}
-          onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(139,92,246,0.15)'}
         >
           <i className="fas fa-edit"></i> Edit
         </button>
@@ -83,13 +81,25 @@ const PatientCard = ({ patient, onEdit, onDelete }) => {
             borderRadius: '40px', 
             color: '#EF4444', 
             cursor: 'pointer', 
-            fontWeight: '500',
-            transition: 'all 0.3s'
+            fontWeight: '500'
           }}
-          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(239,68,68,0.3)'}
-          onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(239,68,68,0.15)'}
         >
           <i className="fas fa-trash"></i> Delete
+        </button>
+        <button 
+          onClick={(e) => { e.stopPropagation(); onAISummary(patient); }} 
+          style={{ 
+            flex: 1, 
+            padding: '8px', 
+            background: 'rgba(6,182,212,0.15)', 
+            border: 'none', 
+            borderRadius: '40px', 
+            color: '#06B6D4', 
+            cursor: 'pointer', 
+            fontWeight: '500'
+          }}
+        >
+          <i className="fas fa-robot"></i> AI
         </button>
       </div>
     </div>

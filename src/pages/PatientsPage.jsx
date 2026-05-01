@@ -9,13 +9,16 @@ import Header from '../components/Layout/Header';
 import PatientCard from '../components/Patients/PatientCard';
 import PatientForm from '../components/Patients/PatientForm';
 import DeleteConfirmation from '../components/Patients/DeleteConfirmation';
+import AISummaryModal from '../components/Patients/AISummaryModal';
+import PatientSkeleton from '../components/Patients/PatientSkeleton';
 import usePatientStore from '../store/patientStore';
 
 const PatientsPage = () => {
-  const { patients, addPatient, updatePatient, deletePatient, getPatientStats } = usePatientStore();
+  const { patients, addPatient, updatePatient, deletePatient, getPatientStats, loading } = usePatientStore();
   const [showForm, setShowForm] = useState(false);
   const [editingPatient, setEditingPatient] = useState(null);
   const [deletingPatient, setDeletingPatient] = useState(null);
+  const [aiPatient, setAiPatient] = useState(null);
   const [stats, setStats] = useState({ 
     monthlyData: [], 
     bloodGroupData: [], 
@@ -97,8 +100,7 @@ const PatientsPage = () => {
         
         {/* Charts Section - 2x2 Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '24px', marginBottom: '32px' }}>
-          
-          {/* Line Chart - Monthly Admissions */}
+          {/* Line Chart */}
           <div className="dashboard-card">
             <h3 style={{ marginBottom: '16px', fontSize: '16px' }}>
               <i className="fas fa-chart-line" style={{ marginRight: '8px', color: '#8B5CF6' }}></i>
@@ -116,7 +118,7 @@ const PatientsPage = () => {
             </ResponsiveContainer>
           </div>
           
-          {/* Pie Chart - Blood Group Distribution */}
+          {/* Pie Chart */}
           <div className="dashboard-card">
             <h3 style={{ marginBottom: '16px', fontSize: '16px' }}>
               <i className="fas fa-tint" style={{ marginRight: '8px', color: '#EC4899' }}></i>
@@ -142,7 +144,7 @@ const PatientsPage = () => {
             </ResponsiveContainer>
           </div>
           
-          {/* Bar Chart - Age Distribution */}
+          {/* Bar Chart */}
           <div className="dashboard-card">
             <h3 style={{ marginBottom: '16px', fontSize: '16px' }}>
               <i className="fas fa-chart-bar" style={{ marginRight: '8px', color: '#10B981' }}></i>
@@ -159,7 +161,7 @@ const PatientsPage = () => {
             </ResponsiveContainer>
           </div>
           
-          {/* Diagnosis Distribution */}
+          {/* Diagnosis Chart */}
           <div className="dashboard-card">
             <h3 style={{ marginBottom: '16px', fontSize: '16px' }}>
               <i className="fas fa-stethoscope" style={{ marginRight: '8px', color: '#F59E0B' }}></i>
@@ -193,43 +195,44 @@ const PatientsPage = () => {
             </button>
           </div>
           
-          {/* Patients Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(330px, 1fr))', gap: '20px' }}>
-            {patients.map(patient => (
-              <PatientCard
-                key={patient.id}
-                patient={patient}
-                onEdit={() => setEditingPatient(patient)}
-                onDelete={() => setDeletingPatient(patient)}
-              />
-            ))}
-          </div>
+          {/* Loading Skeletons */}
+          {loading && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(330px, 1fr))', gap: '20px' }}>
+              {[1,2,3].map(i => <PatientSkeleton key={i} />)}
+            </div>
+          )}
           
-          {patients.length === 0 && (
+          {/* Patients Grid */}
+          {!loading && patients.length > 0 && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(330px, 1fr))', gap: '20px' }}>
+              {patients.map(patient => (
+                <PatientCard
+                  key={patient.id}
+                  patient={patient}
+                  onEdit={setEditingPatient}
+                  onDelete={setDeletingPatient}
+                  onAISummary={setAiPatient}
+                />
+              ))}
+            </div>
+          )}
+          
+          {/* Empty State */}
+          {!loading && patients.length === 0 && (
             <div style={{ textAlign: 'center', padding: '60px', color: '#A1A1AA' }}>
-              <i className="fas fa-users" style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.5 }}></i>
-              <p>No patients yet. Click "Add New Patient" to get started.</p>
+              <i className="fas fa-users" style={{ fontSize: '64px', marginBottom: '16px', opacity: 0.3 }}></i>
+              <h3 style={{ marginBottom: '8px' }}>No Patients Yet</h3>
+              <p>Click "Add New Patient" to get started.</p>
             </div>
           )}
         </div>
       </div>
       
       {/* Modals */}
-      {showForm && (
-        <PatientForm onSave={handleAddPatient} onCancel={() => setShowForm(false)} />
-      )}
-      
-      {editingPatient && (
-        <PatientForm patient={editingPatient} onSave={handleUpdatePatient} onCancel={() => setEditingPatient(null)} />
-      )}
-      
-      {deletingPatient && (
-        <DeleteConfirmation
-          patientName={deletingPatient.name}
-          onConfirm={handleDeletePatient}
-          onCancel={() => setDeletingPatient(null)}
-        />
-      )}
+      {showForm && <PatientForm onSave={handleAddPatient} onCancel={() => setShowForm(false)} />}
+      {editingPatient && <PatientForm patient={editingPatient} onSave={handleUpdatePatient} onCancel={() => setEditingPatient(null)} />}
+      {deletingPatient && <DeleteConfirmation patientName={deletingPatient.name} onConfirm={handleDeletePatient} onCancel={() => setDeletingPatient(null)} />}
+      {aiPatient && <AISummaryModal patient={aiPatient} onClose={() => setAiPatient(null)} />}
     </div>
   );
 };
